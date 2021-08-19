@@ -34,7 +34,7 @@ echo "keycode 107 = Super_L" > ~/.config/X11/Xmodmap
 The following will reverse the scrolling direction. Run the following with superuser privileges.
 
 ```sh
-$ cat 30-touchpad.conf >> /etc/X11/xorg.conf.d/
+$ cat X11/30-touchpad.conf >> /etc/X11/xorg.conf.d/
 ```
 
 ## Steam
