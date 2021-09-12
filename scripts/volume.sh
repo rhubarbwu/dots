@@ -45,7 +45,7 @@ up)
   pamixer -i $delta
   notify "volume_up" "$(make_bar)"
   ;;
-micmute)
+mic)
   pactl set-source-mute @DEFAULT_SOURCE@ toggle
   ismuted=$(pactl list | grep -E "Name: $DEFAULT_SOURCE$|Mute" | tail -1 | cut -d: -f2 | tr -d " ")
   if test $ismuted = "no"; then
