@@ -1,0 +1,95 @@
+# CSLab
+Host cslab
+  HostName cs.toronto.edu
+  User rupert
+Host cluster
+  HostName cluster.cs.toronto.edu
+  User rupert
+  ProxyJump cslab
+Host jim-ba
+  Hostname 10.70.2.95
+  User rupert
+  ProxyJump cslab
+
+
+# Vector Institute
+Host vaughan
+  HostName vlogin.vectorinstitute.ai
+  User rupertwu
+Host vector
+  HostName vremote.vectorinstitute.ai
+  User rupertwu
+Host mars-m
+  HostName m.vectorinstitute.ai
+  User rupertwu
+Host mars-q
+  HostName q.vectorinstitute.ai
+  User rupertwu
+
+
+# Compute Canada
+Host beluga
+  Hostname beluga.computecanada.ca
+  User rupert
+Host cedar
+  Hostname cedar.computecanada.ca
+  User rupert
+Host graham
+  Hostname graham.computecanada.ca
+  User rupert
+Host narval
+  Hostname narval.computecanada.ca
+  User rupert
+Host niagara
+  Hostname niagara.computecanada.ca
+  User rupert
+
+
+# RVL
+Host jeju
+  HostName 142.1.44.55
+  Port 2233
+  User rupert
+Host antarctica
+  HostName 142.1.44.47
+  Port 2233
+  User rupert
+Host galapagos
+  HostName 142.1.44.45
+  Port 2233
+  User rupert
+
+
+# CDF
+Host cdf-s
+  HostName teach.cs.toronto.edu
+  User wurober2
+Host cdf-i
+  HostName teach.cs.toronto.edu
+  User rupert
+
+
+# Deerfield@UTM
+Host dh2010pc11
+  HostName dh2010pc11.utm.utoronto.ca
+  User wurober2
+
+
+# MathLab@UTSC
+Host mathlab
+  HostName mathlab.utsc.utoronto.ca
+  User wurober2
+
+
+# CSGSBS
+Host gsbs-www
+  Hostname settlement.cs.toronto.edu
+  User csgsbs
+Host gsbs-mail
+  HostName comps0.cs.toronto.edu
+  User csgsbs
+
+
+# GitLab
+Host gitlab.com
+  UpdateHostKeys no
