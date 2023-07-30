@@ -19,6 +19,15 @@ Host vaughan
 Host vector
   HostName vremote.vectorinstitute.ai
   User rupertwu
+Host vec1
+  HostName v1.vectorinstitute.ai
+  User rupertwu
+Host vec2
+  HostName v2.vectorinstitute.ai
+  User rupertwu
+Host vec3
+  HostName v3.vectorinstitute.ai
+  User rupertwu
 Host mars-m
   HostName m.vectorinstitute.ai
   User rupertwu

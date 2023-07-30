@@ -1,65 +1,13 @@
 #!/bin/sh
 
-# VARIABLES
+archlinux=true
+media=true
 
-archlinux=false
-media=false
-
-computecanada=false
 slurm=false
+computecanada=false
+vector=false
 
-# TERMINAL/SHELL
-
-export HISTCONTROL=ignoreboth:erasedups
-
-# EDITOR & DOCS
-
-export VISUAL="vim"
-if eval "command -v nvim &> /dev/null"; then
-    alias vim='nvim'
-    export VISUAL="nvim"
-fi
-export EDITOR="$VISUAL"
-export SUDO_EDITOR="$VISUAL"
-export GIT_EDITOR="$VISUAL"
-
-mktex() {
-    latexindent.pl *.tex
-    case $2 in
-    lua*) lualatex $1.tex ;;
-    xe*) xelatex $1.tex ;;
-    *) pdflatex $1.tex ;;
-    esac
-    if [ $? -eq 0 ]; then
-        rm -f $1.aux $1.fdb_latexmk $1.fls $1.log
-    fi
-}
-
-# PATH
-
-append() {
-    if [ -d "$1" ]; then
-        export PATH=$PATH:$1
-    fi
-}
-append "$HOME/.cargo/bin"
-append "$HOME/.local/bin"
-append "/usr/share/bin"
-
-# MEDIA
-
-if [ $media = true ]; then
-    export XDG_CONFIG_HOME=~/.config
-    export XDG_MUSIC_DIR=~/Music
-    export TERM=rxvt-256color
-
-    alias ytmp3="yt-dlp -x --audio-format mp3"
-    alias ytm4a="yt-dlp -x --audio-format m4a"
-
-    [ ! -s ~/.mpd/mpd.pid ] && systemctl start --user mpd
-fi
-
-# ARCH LINUX
+# PACKAGES
 
 if [ $archlinux = true ]; then
 
@@ -78,7 +26,47 @@ if [ $archlinux = true ]; then
 
 fi
 
-# COMPUTE CANADA
+# MEDIA
+
+if [ $media = true ]; then
+    export XDG_CONFIG_HOME=~/.config
+    export XDG_MUSIC_DIR=~/Music
+    export TERM=rxvt-256color
+
+    alias ytmp3="yt-dlp -x --audio-format mp3"
+    alias ytm4a="yt-dlp -x --audio-format m4a"
+
+    [ ! -s ~/.mpd/mpd.pid ] && systemctl start --user mpd
+fi
+
+# SHELL & ENVIRONMENT
+
+export LC_ALL=en_US.UTF-8
+
+export HISTCONTROL=ignoreboth:erasedups
+export VISUAL="vim"
+if eval "command -v nvim &> /dev/null"; then
+    alias vim='nvim'
+    export VISUAL="nvim"
+fi
+export EDITOR="$VISUAL"
+export SUDO_EDITOR="$VISUAL"
+export GIT_EDITOR="$VISUAL"
+
+append() {
+    if [ -d "$1" ]; then
+        export PATH=$PATH:$1
+    fi
+}
+append "$HOME/.cargo/bin"
+append "$HOME/.local/bin"
+append "/usr/share/bin"
+
+# SLURM/CLUSTER
+
+if [ $vector = true ]; then
+    export SCRATCH=/scratch/ssd004/scratch/rupertwu
+fi
 
 if [ $computecanada = true ]; then
     export SLURM_ACCOUNT=def-papyan
@@ -86,28 +74,53 @@ if [ $computecanada = true ]; then
     export SALLOC_ACCOUNT=$SLURM_ACCOUNT
     export DATASET_DIR=/home/rupert/projects/$SLURM_ACCOUNT/rupert/data/
 
+    alias srun="srun --account $SLURM_ACCOUNT"
+
     # Environment
     module load meta-farm
     module load scipy-stack
     module load python/3.10
+    module load gcc/9.3.0 arrow/8
 fi
 
-# SLURM
-
 if [ $slurm = true ]; then
-    alias scu="scancel -u $USER"
-    alias squ="squeue -u $USER"
-    sbash() {
-        srun --account=$SLURM_ACCOUNT --mem=$1 --gres=gpu:1 --pty bash
+    scu() {
+        scancel -u $USER
     }
-    smi() {
-        srun --account=$SLURM_ACCOUNT --mem=256M --gres=gpu:1 --pty nvidia-smi
+    squ() {
+        squeue -u $USER
+    }
+    scpu() {
+        srun --mem=$1 --pty bash
+    }
+    sgpu() {
+        srun --mem=$1 --gres=gpu:1 --pty bash
+    }
+    nsmi() {
+        srun -p $1 --gres=gpu:1 --pty nvidia-smi
     }
 fi
 
 # TOOLS
 
+sshc() {
+    code --remote ssh-remote+$1 $2
+}
 jup() {
+    book_port=$1
+    node_name=$2
+    ssh vector -NL $node_name:$book_port:$node_name
     # ssh your_user_name@v.vectorinstitute.ai -NL 5924:<the node name>:5924
-    ssh vremote -NL 5924:$1:5924
+}
+
+mktex() {
+    latexindent.pl *.tex
+    case $2 in
+    lua*) lualatex $1.tex ;;
+    xe*) xelatex $1.tex ;;
+    *) pdflatex $1.tex ;;
+    esac
+    if [ $? -eq 0 ]; then
+        rm -f $1.aux $1.fdb_latexmk $1.fls $1.log
+    fi
 }
