@@ -1,0 +1,21 @@
+[alias]
+br = branch
+ci = commit
+cia = commit --amend
+cl = clone
+co = checkout
+l = log
+mg = merge
+p = push
+pf = push --force
+rb = rebase
+re = restore
+rth = reset --hard HEAD^
+rt = reset
+ss = stash
+st = status
+sw = switch
+
+[user]
+# name = 
+# email =

@@ -1,0 +1,162 @@
+#!/bin/sh
+
+if [ "$(uname)" = "Darwin" ]; then
+    ENV_OS=$(sw_vers -productName)"-"$(sw_vers -productVersion)
+elif [ "$(uname)" = "Linux" ]; then
+    if [ -f /etc/os-release ]; then
+        ENV_OS=$(. /etc/os-release && echo "$ID")
+    else
+        ENV_OS="linux"
+    fi
+fi
+ENV_LOCAL=false
+ENV_MEDIA=false
+ENV_SLURM=false
+
+# PACKAGES
+
+case $ENV_OS in
+"arch")
+    PKG_MGR="sudo pacman"
+    if command -v paru >/dev/null 2>&1; then
+        PKG_MGR="paru"
+    elif command -v yay >/dev/null 2>&1; then
+        PKG_MGR="yay"
+    fi
+    alias upgrade="$PKG_MGR -Syyu"
+    alias look="$PKG_MGR -Q | grep"
+    alias tidy="$PKG_MGR -Rns \$(pacman -Qdtq)"
+    alias yeet="$PKG_MGR -Rcns"
+
+    prank() {
+        FILE=$XDG_CONFIG_HOME/mirrorlist.bak
+        if [ ! -e $FILE ]; then
+            wget -O $FILE "https://archlinux.org/mirrorlist/all/"
+            sed -i 's/#Server/Server/' $FILE
+        fi
+        rankmirrors /etc/pacman.d/mirrorlist.bak | sudo tee /etc/pacman.d/mirrorlist
+        sudo pacman -Syyu
+    }
+    ;;
+"ubuntu")
+    alias upgrade="sudo apt update && sudo apt upgrade -y"
+    alias look="apt list --installed | grep"
+    alias tidy="apt autoremove"
+    alias yeet="apt purge"
+    ;;
+"macOS")
+    alias ls="ls -G"
+    ;;
+esac
+
+# SHELL & ENVIRONMENT
+
+export HISTCONTROL=ignoreboth:erasedups
+
+export VISUAL="vim"
+if eval "command -v nvim &> /dev/null"; then
+    alias vim='nvim'
+    export VISUAL="nvim"
+fi
+export EDITOR="$VISUAL"
+export GIT_EDITOR="$VISUAL"
+export SUDO_EDITOR="$VISUAL"
+
+append() {
+    if [ -d "$1" ]; then
+        export PATH=$PATH:$1
+    fi
+}
+append "$HOME/.cargo/bin"
+append "$HOME/.local/bin"
+append "/usr/share/bin"
+
+## DEV ALISES
+
+if eval "command -v just &> /dev/null"; then
+    alias jfmt='just --fmt --unstable'
+fi
+if eval "command -v uv &> /dev/null"; then
+    alias pip='uv pip'
+    alias venv='uv venv'
+fi
+if command -v cursor >/dev/null 2>&1; then
+    alias code=cursor
+fi
+
+# HARDWARE
+
+if [ $ENV_LOCAL = true ]; then
+    set_drive() {
+        local drive=$1
+        if [ ! -e /dev/$drive ]; then
+            echo "drive [$drive] doesn't exist"
+            return 1
+        fi
+        if ! echo "$drive" | grep -qE "^sd|^nvme"; then
+            echo "drive type of [$drive] not supported"
+            return 1
+        fi
+
+        local state=$2
+        if [ "$state" -ne 0 ] && [ "$state" -ne 1 ]; then
+            return 1
+        fi
+
+        if [ "$state" -eq 0 ]; then
+            sudo umount /dev/$drive
+            if [ $? -ne 0 ]; then
+                echo "failed to unmount $drive"
+                return 1
+            fi
+        fi
+
+        if [[ $drive =~ ^nvme ]]; then
+            sudo nvme set-feature /dev/$drive --feature-id=0x06 --value=0x0$state
+        elif [ "$state" -eq 0 ]; then
+            sudo hdparm -Y /dev/$drive
+        elif [ "$state" -eq 1 ]; then
+            sudo hdparm -W1 /dev/$drive
+        fi
+    }
+fi
+
+# MEDIA
+
+if [ $ENV_MEDIA = true ]; then
+    export XDG_CONFIG_HOME=~/.config
+    export XDG_MUSIC_DIR=~/Music
+    export TERM=rxvt-256color
+
+    alias ytmp3="yt-dlp -x --audio-format mp3"
+    alias ytm4a="yt-dlp -x --audio-format m4a"
+
+    [ ! -s ~/.mpd/mpd.pid ] && systemctl --user is-enabled mpd >/dev/null 2>&1 && systemctl --user start mpd
+fi
+
+# SLURM
+
+if [ $ENV_SLURM = true ]; then
+    squ() {
+        user=${1:-$USER}
+        squeue -u $user
+    }
+    scu() {
+        echo "Your current jobs:"
+        squ
+        echo ""
+        read -p "Are you sure you want to cancel all your jobs? (y/n): " confirm
+        if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
+            scancel -u $USER
+            echo "All jobs canceled."
+        else
+            echo "Operation canceled."
+        fi
+    }
+fi
+
+# WSL STUFF
+
+WIN_USR=
+WINSPACE=/mnt/c/Users/$WIN_USR
+SKYDRIVE=/mnt/c/Users/$WIN_USR/OneDrive/
