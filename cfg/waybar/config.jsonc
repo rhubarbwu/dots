@@ -1,0 +1,19 @@
+{
+  "height": 30,
+  "spacing": 12,
+  "margin-right": 10,
+
+  "layer": "top",
+
+  "include": ["~/.config/waybar/modules.jsonc"],
+  "modules-left": ["hyprland/workspaces"],
+  "modules-center": ["clock"],
+  "modules-right": [
+    "pulseaudio",
+    "pulseaudio#input",
+    "bluetooth",
+    "network",
+    "battery#bat0",
+    "battery#bat1"
+  ]
+}
