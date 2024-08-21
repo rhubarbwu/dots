@@ -1,0 +1,82 @@
+{
+  "hyprland/workspaces": {
+    "format": "{name}",
+    "format-icons": {
+      "active": "",
+      "default": "",
+      "persistent": ""
+    },
+    "on-scroll-up": "hyprctl dispatch workspace r-1",
+    "on-scroll-down": "hyprctl dispatch workspace r+1",
+    "all-outputs": true
+  },
+  "battery#bat0": {
+    "bat": "BAT0",
+    "format": "{capacity}% {icon} ",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "battery#bat1": {
+    "bat": "BAT1",
+    "format": "{capacity}% {icon} ",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "clock": {
+    "format": "{:%a %b %d | %H:%M}"
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": " {volume}%",
+    // "format-source": "{volume}% ",
+    // "format-source-muted": "{volume}%  ",
+
+    "format-icons": {
+      "headphone": " ",
+      "hands-free": " ",
+      "headset": " ",
+      "phone": " ",
+      "portable": " ",
+      "car": " ",
+      "default": [" ", " ", " "]
+    },
+    "max-volume": 100,
+    "on-click": "pavucontrol",
+    "on-click-middle": "pavucontrol"
+  },
+
+  "pulseaudio#input": {
+    "format-source": " {volume}%",
+    "format-source-muted": " {volume}%",
+    "format": "{format_source}",
+    "scroll-step": 1,
+    "smooth-scrolling-threshold": 1,
+    "max-volume": 100,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle",
+    "on-click-middle": "pavucontrol",
+    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%+ -l 1.",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-"
+  },
+
+  "bluetooth": {
+    "format": " ({status})",
+    "format-disabled": " (off)",
+    "format-off": " (dis)",
+    "interval": 30,
+    "on-click": "blueberry",
+    "format-no-controller": ""
+  },
+
+  "network": {
+    "format": "{ifname}",
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "  {ifname}",
+    "format-disconnected": "Disconnected",
+    "tooltip-format": " {ifname} via {gwaddri}",
+    "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+    "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
+    "tooltip-format-disconnected": "Disconnected",
+    "max-length": 50,
+    "on-click": "$(cat ~/dotfiles/.settings/terminal.sh) --class dotfiles-floating -e nmtui",
+    "on-click-right": "nm-connection-editor"
+  }
+}
