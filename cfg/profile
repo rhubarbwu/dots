@@ -1,0 +1,119 @@
+#!/bin/sh
+
+ENV_ARCH=true
+ENV_MEDIA=true
+
+ENV_CC=false
+ENV_SLURM=false
+
+# PACKAGES
+
+if [ $ENV_ARCH = true ]; then
+    alias look="paru -Q | grep"
+    alias tidy="sudo pacman -Rns \$(pacman -Qdtq)"
+    alias yeet="paru -Rcns"
+
+    prank() {
+        FILE=$XDG_CONFIG_HOME/mirrorlist.bak
+        if [ ! -e $FILE ]; then
+            wget -O $FILE "https://archlinux.org/mirrorlist/all/"
+            sed -i 's/#Server/Server/' $FILE
+        fi
+        rankmirrors /etc/pacman.d/mirrorlist.bak | sudo tee /etc/pacman.d/mirrorlist
+        sudo pacman -Syyu
+    }
+
+fi
+
+# MEDIA
+
+if [ $ENV_MEDIA = true ]; then
+    export XDG_CONFIG_HOME=~/.config
+    export XDG_MUSIC_DIR=~/Music
+    export TERM=rxvt-256color
+
+    alias ytmp3="yt-dlp -x --audio-format mp3"
+    alias ytm4a="yt-dlp -x --audio-format m4a"
+
+    [ ! -s ~/.mpd/mpd.pid ] && systemctl --user is-enabled mpd >/dev/null 2>&1 && systemctl --user start mpd
+fi
+
+# SHELL & ENVIRONMENT
+
+export HISTCONTROL=ignoreboth:erasedups
+
+export VISUAL="vim"
+if eval "command -v nvim &> /dev/null"; then
+    alias vim='nvim'
+    export VISUAL="nvim"
+fi
+export EDITOR="$VISUAL"
+export GIT_EDITOR="$VISUAL"
+export SUDO_EDITOR="$VISUAL"
+if eval "command -v just &> /dev/null"; then
+    alias jfmt='just --fmt --unstable'
+fi
+if eval "command -v uv &> /dev/null"; then
+    alias pip='uv pip'
+    alias venv='uv venv'
+fi
+
+append() {
+    if [ -d "$1" ]; then
+        export PATH=$PATH:$1
+    fi
+}
+append "$HOME/.cargo/bin"
+append "$HOME/.local/bin"
+append "/usr/share/bin"
+
+## WSL STUFF
+
+WIN=/mnt/c/Users/wurup
+WIN_MUS=/mnt/c/Users/wurup/OneDrive/Music/
+
+# SLURM/CLUSTER
+
+if [ $ENV_CC = true ]; then
+    export SLURM_ACCOUNT=def-papyan
+    export SBATCH_ACCOUNT=$SLURM_ACCOUNT
+    export SALLOC_ACCOUNT=$SLURM_ACCOUNT
+    export DATASET_DIR=/home/rupert/projects/$SLURM_ACCOUNT/rupert/data/
+
+    alias srun=srun --account
+
+    # Environment
+    module load meta-farm
+    module load scipy-stack
+    module load python/3.10
+fi
+
+if [ $ENV_SLURM = true ]; then
+    alias scu="scancel -u $USER"
+    alias squ="squeue -u $USER"
+    scpu() {
+        srun --mem=$1 --pty bash
+    }
+    sgpu() {
+        srun --mem=$1 --gres=gpu:1 --pty bash
+    }
+    nsmi() {
+        srun -p $1 --gres=gpu:1 --pty nvidia-smi
+    }
+fi
+
+# TOOLS
+
+alias texcl="rm -f *.aux *.bbl *.blg *latexmk *.fls *.log *.out *.pdf *synctex*"
+
+mktex() {
+    latexindent.pl *.tex
+    case $2 in
+    lua*) lualatex $1.tex ;;
+    xe*) xelatex $1.tex ;;
+    *) pdflatex $1.tex ;;
+    esac
+    if [ $? -eq 0 ]; then
+        rm -f $1.aux $1.fdb_latexmk $1.fls $1.log
+    fi
+}
