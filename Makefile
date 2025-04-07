@@ -1,9 +1,42 @@
 CFG_DIR := $(HOME)/.config
 MAKEFLAGS += --no-print-directory
 
+do:
+	@echo "Usage:"
+	@echo "  make do                            - Display this help message"
+	@echo "  make aur pkgr=<package>            - Install AUR package"
+	@echo "  make base                          - Install base development packages"
+	@echo "  make blue                          - Install Bluetooth packages"
+	@echo "  make brave                         - Install Brave browser"
+	@echo "  make code                          - Install Visual Studio Code"
+	@echo "  make cups                          - Install CUPS packages"
+	@echo "  make desktop                       - Install desktop environment packages"
+	@echo "  make discord                       - Install Discord"
+	@echo "  make firmware                      - Install Firmware packages"
+	@echo "  make fprint                        - Install Fprint packages"
+	@echo "  make git                           - Install Git"
+	@echo "  make inst pkgs=\"pkg1 pkg2...\"      - Install packages with AUR helper or pacman"
+	@echo "  make line FILE=<file> FLAG=<flag>  - Append a line to a file if not present"
+	@echo "  make media                         - Install media packages"
+	@echo "  make mobile                        - Install mobile packages"
+	@echo "  make network                       - Install Network Manager packages"
+	@echo "  make nvim                          - Install Neovim"
+	@echo "  make ozone app=<app>               - Add Wayland flag to app config"
+	@echo "  make pacman                        - Install Pacman"
+	@echo "  make paru                          - Install paru AUR helper"
+	@echo "  make pipe                          - Install Pipewire packages"
+	@echo "  make prod                          - Install productivity packages"
+	@echo "  make profile                       - Install profile"
+	@echo "  make python                        - Install Python"
+	@echo "  make rust                          - Install Rust"
+	@echo "  make sysd srv=<service>            - Enable and start system service"
+	@echo "  make term                          - Install terminal packages"
+	@echo "  make usrd srv=<service>            - Enable and start user service"
+	@echo "  make yay                           - Install yay AUR helper"
+	
 # File Manipulation
 line:
-	@FILE=$(FILE) FLAG=$(FLAG); \
+	@FILE="$(FILE)" FLAG="$(FLAG)"; \
 	if [ -f "$$FILE" ] && grep -q -- "$$FLAG" "$$FILE"; then \
 		echo "$$FILE already contains $$FLAG"; \
 	else \
@@ -55,7 +88,7 @@ blue:
 pipe:
 	$(MAKE) inst pkgs="pipewire pipewire-audio pipewire-jack pipewire-session-manager wireplumber pavucontrol"
 	$(MAKE) usrd srv="pipewire pipewire-pulse"
-	sudo $(MAKE) line_FLAG_FILE 'load-module module-switch-on-connect' /etc/pulse/default.pa
+	sudo $(MAKE) line FLAG="load-module module-switch-on-connect" FILE="/etc/pulse/default.pa"
 
 network:
 	$(MAKE) inst pkgs="networkmanager network-manager-applet"
@@ -139,8 +172,9 @@ pacman:
 	sudo sed -i '/^\[community\]/,+1 s/^#//' /etc/pacman.conf
 	sudo sed -i '/^\[multilib\]/,+1 s/^#//' /etc/pacman.conf
 
-profile:
+profile: cfg/profile
 	cp cfg/profile $(HOME)/.profile
+	$(MAKE) line FLAG="source ~/.profile" FILE="$(HOME)/.bashrc"
 
 # Utilities
 mobile:
