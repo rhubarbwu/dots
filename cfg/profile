@@ -76,13 +76,15 @@ append "/usr/share/bin"
 if eval "command -v just &> /dev/null"; then
     alias jfmt='just --fmt --unstable'
 fi
-if eval "command -v uv &> /dev/null"; then
-    alias pip='uv pip'
-    alias venv='uv venv'
-fi
 if command -v cursor >/dev/null 2>&1; then
     alias code=cursor
 fi
+alias hfcli='huggingface-cli'
+alias uvp='uv pip'
+alias uvv='uv venv'
+dock() {
+    docker exec -it $1 /bin/bash
+}
 
 # HARDWARE
 
